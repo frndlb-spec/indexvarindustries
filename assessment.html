@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessment Gestione Dati Tecnici | Var Industries</title>
+<style>
+  :root {
+    --blue: #1A3C6E; --accent: #2E75B6; --green: #2D7A1F;
+    --green-bg: #E8F5E2; --yellow-bg: #FFF9DB; --red-bg: #FFF0F0;
+    --orange-bg: #FFF3E0; --gray: #F5F7FA; --border: #E0E6EF;
+    --text: #1A1A1A; --muted: #6B7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F0F4F8; color: var(--text); min-height: 100vh; }
+  .header { background: var(--blue); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { color: white; font-size: 14px; font-weight: 600; letter-spacing: 0.05em; opacity: 0.9; }
+  .score-badge { background: rgba(255,255,255,0.15); color: white; border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 600; }
+  .score-badge span { font-size: 18px; font-weight: 700; }
+  .hero { background: var(--blue); padding: 48px 24px 56px; text-align: center; color: white; }
+  .hero h1 { font-size: clamp(22px, 4vw, 34px); font-weight: 700; line-height: 1.2; max-width: 700px; margin: 0 auto 16px; }
+  .hero p { font-size: 16px; opacity: 0.82; max-width: 560px; margin: 0 auto; line-height: 1.6; }
+  .progress-wrap { background: white; padding: 16px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .progress-bar-bg { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { background: var(--accent); height: 100%; border-radius: 99px; width: 0%; transition: width 0.4s ease; }
+  .main { max-width: 780px; margin: 0 auto; padding: 32px 16px 64px; }
+  .q-card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; transition: box-shadow 0.2s; }
+  .q-card:hover { box-shadow: 0 4px 16px rgba(26,60,110,0.08); }
+  .q-card.answered { border-color: var(--accent); }
+  .q-header { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+  .q-num { min-width: 32px; height: 32px; background: var(--blue); color: white; border-radius: 8px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .q-card.answered .q-num { background: var(--accent); }
+  .q-text { font-size: 16px; line-height: 1.5; font-weight: 500; }
+  .q-buttons { display: flex; gap: 10px; }
+  .btn-si, .btn-no { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; background: white; color: var(--muted); }
+  .btn-si:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+  .btn-no:hover { border-color: var(--accent); color: var(--accent); background: #EFF6FF; }
+  .btn-si.selected { background: var(--green); border-color: var(--green); color: white; }
+  .btn-no.selected { background: var(--accent); border-color: var(--accent); color: white; }
+  .btn-si.unselected, .btn-no.unselected { opacity: 0.45; }
+  .quick-win { display: none; margin-top: 16px; padding: 14px 16px; background: var(--green-bg); border-left: 4px solid var(--green); border-radius: 0 8px 8px 0; }
+  .quick-win.visible { display: flex; gap: 10px; align-items: flex-start; animation: slideIn 0.3s ease; }
+  .qw-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .qw-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--green); text-transform: uppercase; margin-bottom: 4px; }
+  .qw-text { font-size: 14px; line-height: 1.55; color: #1E4620; }
+  .q-hours { display: none; margin-top: 10px; font-size: 13px; color: var(--muted); font-style: italic; }
+  .q-hours.visible { display: block; }
+  .results { display: none; margin-top: 32px; }
+  .results.visible { display: block; animation: slideIn 0.4s ease; }
+  .results-header { background: var(--blue); color: white; border-radius: 12px 12px 0 0; padding: 28px 28px 24px; text-align: center; }
+  .results-header h2 { font-size: 24px; margin-bottom: 6px; }
+  .score-big { font-size: 64px; font-weight: 800; line-height: 1; margin: 12px 0 4px; }
+  .score-label { font-size: 15px; opacity: 0.75; }
+  .results-body { background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 12px 12px; padding: 28px; }
+  .interp-card { padding: 18px 20px; border-radius: 10px; margin-bottom: 24px; font-size: 15px; line-height: 1.6; }
+  .interp-card strong { display: block; font-size: 17px; margin-bottom: 6px; }
+  .interp-0 { background: var(--green-bg); color: #1E4620; }
+  .interp-1 { background: var(--yellow-bg); color: #5C4000; }
+  .interp-2 { background: var(--orange-bg); color: #7A3500; }
+  .interp-3 { background: var(--red-bg); color: #7A0000; }
+  .calc-section { margin-top: 24px; }
+  .calc-section h3 { font-size: 16px; font-weight: 700; color: var(--blue); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .calc-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .calc-row label { flex: 1; min-width: 220px; font-size: 14px; }
+  .calc-row input { width: 120px; padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--blue); outline: none; transition: border-color 0.15s; }
+  .calc-row input:focus { border-color: var(--accent); }
+  .calc-row .unit { font-size: 13px; color: var(--muted); min-width: 60px; }
+  .calc-result { background: var(--blue); color: white; border-radius: 10px; padding: 20px 24px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .calc-result-label { font-size: 15px; opacity: 0.85; }
+  .calc-result-value { font-size: 32px; font-weight: 800; }
+  .cta-section { margin-top: 28px; padding: 24px; background: var(--gray); border-radius: 10px; text-align: center; }
+  .cta-section p { font-size: 15px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+  .cta-btn { display: inline-block; background: var(--blue); color: white; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 700; text-decoration: none; transition: background 0.15s, transform 0.1s; }
+  .cta-btn:hover { background: var(--accent); transform: translateY(-1px); }
+  .footer { text-align: center; padding: 24px; font-size: 12px; color: var(--muted); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">VAR INDUSTRIES &nbsp;|&nbsp; PLM/PDM Assessment</div>
+  <div class="score-badge">Risposte: <span id="score-count">0</span>/10</div>
+</div>
+
+<div class="hero">
+  <h1>10 segnali che la tua gestione dei dati tecnici ti costa più di quanto pensi</h1>
+  <p>Rispondi Sì o No a ogni domanda. Per ogni Sì ricevi una quick win implementabile subito, senza software aggiuntivo.</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="prog-text">0 di 10 risposte</span>
+    <span id="prog-si">0 Sì</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar"></div>
+  </div>
+</div>
+
+<div class="main">
+  <div id="questions"></div>
+
+  <div class="results" id="results">
+    <div class="results-header">
+      <h2>Il tuo risultato</h2>
+      <div class="score-big" id="final-score">-</div>
+      <div class="score-label">Sì su 10 domande</div>
+    </div>
+    <div class="results-body">
+      <div id="interpretation"></div>
+      <div class="calc-section">
+        <h3>Calcola il costo nascosto annuo</h3>
+        <div class="calc-row">
+          <label>Tecnici CAD / ingegneri coinvolti</label>
+          <input type="number" id="n-tecnici" value="5" min="1" oninput="calcCosto()">
+          <span class="unit">persone</span>
+        </div>
+        <div class="calc-row">
+          <label>Ore perse a settimana per tecnico (stima: 2h per ogni Sì)</label>
+          <input type="number" id="ore-sett" min="0" oninput="calcCosto()">
+          <span class="unit">ore/sett.</span>
+        </div>
+        <div class="calc-row">
+          <label>Costo orario medio tecnico</label>
+          <input type="number" id="costo-ora" value="35" min="1" oninput="calcCosto()">
+          <span class="unit">€/ora</span>
+        </div>
+        <div class="calc-result">
+          <div>
+            <div class="calc-result-label">Costo nascosto stimato ogni anno</div>
+            <div style="font-size:13px;opacity:0.7;margin-top:2px;">basato sui tuoi Sì × 46 settimane lavorative</div>
+          </div>
+          <div class="calc-result-value" id="costo-annuo">€ —</div>
+        </div>
+      </div>
+      <div class="cta-section">
+        <p>Vuoi capire dove intervenire per primo e con quale impatto concreto?<br>
+        In 30 minuti mappiamo i 3 colli di bottiglia del tuo ufficio tecnico.<br>
+        Nessuna presentazione di prodotto — solo un piano d'azione scritto.</p>
+        <a class="cta-btn" href="https://zcal.co/francescodb/audtigratuito" target="_blank">
+          Prenota il tuo audit gratuito &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Var Industries &nbsp;&bull;&nbsp; Siemens Platinum Partner &nbsp;&bull;&nbsp; PLM/PDM per il manifatturiero italiano
+</div>
+
+<script>
+const questions = [
+  { q: "Trovi spesso più versioni dello stesso disegno in cartelle diverse, senza sapere quale sia quella aggiornata?", h: "1–2 ore a settimana per tecnico", qw: "Crea una sottocartella <strong>RILASCIATO</strong> in ogni progetto. Solo lì finiscono i file con revisione approvata. Comunica la regola al team via email. Costo: 30 minuti." },
+  { q: "I tuoi tecnici impiegano più di 20 minuti a trovare un disegno o una specifica tecnica?", h: "2–3 ore a settimana per tecnico", qw: "Adotta una naming convention standard: <strong>[CodiceProgetto]_[NomeDoc]_RevX_YYYYMMDD</strong>. Applica la regola ai nuovi progetti da domani. Costo: zero." },
+  { q: "Sono mai arrivate in produzione distinte base con errori o componenti non aggiornati?", h: "3–5 ore per ogni evento (stima: 2–4 eventi/anno)", qw: "Introduce un <strong>freeze formale della distinta</strong>: nessun rilascio in produzione senza firma del Resp. Tecnico su un modulo di approvazione. Crea il modulo in Word oggi." },
+  { q: "Le modifiche tecniche vengono comunicate via email, WhatsApp o verbalmente, senza un registro ufficiale?", h: "1 ora a settimana per tracciare e verificare", qw: "Apri un file Excel condiviso <strong>Registro Modifiche Tecniche</strong> con le colonne: data, prodotto, descrizione, chi ha approvato, stato. Compilalo da questa settimana." },
+  { q: "Quando più tecnici lavorano sullo stesso progetto, capita che si sovrascrivano i file a vicenda?", h: "1–3 ore a settimana per recupero e riconciliazione", qw: "Crea un <strong>file Excel di check-out condiviso</strong>: chi lavora su un file lo segna con nome e data. Regola: nessuno tocca un file già segnato. Implementabile oggi." },
+  { q: "Gestite varianti o personalizzazioni per cliente e fate fatica a tenere allineata la documentazione?", h: "2–4 ore a settimana", qw: "Per ogni variante, crea una cartella separata con: disegno, distinta, specifica cliente. Non modificare mai la cartella base — <strong>tieni varianti e standard separati</strong>." },
+  { q: "Preparare la documentazione tecnica per un'offerta o una revisione richiede più di 2 ore?", h: "2–4 ore per offerta", qw: "Crea un <strong>template di offerta tecnica</strong> con sezioni pre-compilate. Salva i disegni standard in una cartella TEMPLATE OFFERTE. Il primo riutilizzo vale già 1 ora risparmiata." },
+  { q: "Un nuovo tecnico impiega più di 2 settimane per capire dove trovare la documentazione di progetto?", h: "10–20 ore per ogni nuova assunzione", qw: "Scrivi una <strong>mappa dell'archivio</strong>: 1 pagina con struttura cartelle, naming convention, regole di accesso. Falla scrivere al prossimo nuovo arrivato come primo compito." },
+  { q: "In caso di audit qualità, raccogliere tutta la documentazione tecnica richiesta richiede più di mezza giornata?", h: "4–8 ore per audit (stima: 2–4 audit/anno)", qw: "Crea una <strong>checklist di audit</strong> con i documenti richiesti. Aggiornala a ogni progetto chiuso. Al prossimo audit hai già tutto pronto." },
+  { q: "La distinta base tecnica (nel CAD) e quella gestionale (nell'ERP) vengono aggiornate manualmente e separatamente?", h: "2–4 ore a settimana per riconciliazione", qw: "Designa un <strong>anchor tra ufficio tecnico e acquisti/produzione</strong>. Fissa una call settimanale di 30 minuti per allineare le distinte. Costa solo tempo di riunione." }
+];
+
+const interpretations = [
+  { range:[0,2], cls:"interp-0", title:"0–2 Sì — Sotto controllo", text:"Hai già una gestione strutturata. Valuta se stai lasciando sul tavolo efficienza nella scalabilità o nella collaborazione multi-sede." },
+  { range:[3,5], cls:"interp-1", title:"3–5 Sì — Segnali da non ignorare", text:"Ci sono perdite concrete, probabilmente già visibili nel quotidiano. Le quick win di questo documento ti danno un punto di partenza. Considera una mappatura completa del tuo flusso tecnico." },
+  { range:[6,8], cls:"interp-2", title:"6–8 Sì — Attenzione", text:"Il disordine nei dati tecnici ti sta costando ore, errori e reputazione. Le quick win non bastano: serve una struttura. Vale la pena capire quanto ti costa davvero e quale percorso ha senso per la tua realtà." },
+  { range:[9,10], cls:"interp-3", title:"9–10 Sì — Urgente", text:"Stai perdendo competitività ogni settimana. Il rischio non è solo di efficienza interna: è di risposta al mercato. Un audit di 30 minuti ti porta un piano concreto, non una presentazione." }
+];
+
+let answers = new Array(10).fill(null);
+
+function renderQuestions() {
+  const container = document.getElementById('questions');
+  questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-card';
+    div.id = 'card-' + i;
+    div.innerHTML = `
+      <div class="q-header">
+        <div class="q-num" id="num-${i}">${String(i+1).padStart(2,'0')}</div>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="q-buttons">
+        <button class="btn-si" onclick="answer(${i}, true)">Sì</button>
+        <button class="btn-no" onclick="answer(${i}, false)">No</button>
+      </div>
+      <div class="q-hours" id="hours-${i}">⏱ Ore perse stimate: ${q.h}</div>
+      <div class="quick-win" id="qw-${i}">
+        <div class="qw-icon">💡</div>
+        <div class="qw-content">
+          <div class="qw-label">Quick win — implementabile oggi</div>
+          <div class="qw-text">${q.qw}</div>
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function answer(i, isSi) {
+  answers[i] = isSi;
+  const card  = document.getElementById('card-' + i);
+  const qw    = document.getElementById('qw-' + i);
+  const hours = document.getElementById('hours-' + i);
+  const btns  = card.querySelectorAll('button');
+  btns.forEach(b => b.classList.remove('selected','unselected'));
+  if (isSi) {
+    btns[0].classList.add('selected'); btns[1].classList.add('unselected');
+    qw.classList.add('visible'); hours.classList.add('visible');
+  } else {
+    btns[1].classList.add('selected'); btns[0].classList.add('unselected');
+    qw.classList.remove('visible'); hours.classList.remove('visible');
+  }
+  card.classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = answers.filter(a => a !== null).length;
+  const yesCount = answers.filter(a => a === true).length;
+  document.getElementById('score-count').textContent = answered;
+  document.getElementById('prog-text').textContent = answered + ' di 10 risposte';
+  document.getElementById('prog-si').textContent = yesCount + ' Sì';
+  document.getElementById('progress-bar').style.width = (answered / 10 * 100) + '%';
+  if (answered === 10) showResults(yesCount);
+}
+
+function showResults(yesCount) {
+  const resultsEl = document.getElementById('results');
+  resultsEl.classList.add('visible');
+  document.getElementById('final-score').textContent = yesCount;
+  const interp = interpretations.find(x => yesCount >= x.range[0] && yesCount <= x.range[1]);
+  document.getElementById('interpretation').innerHTML = `<div class="interp-card ${interp.cls}"><strong>${interp.title}</strong>${interp.text}</div>`;
+  document.getElementById('ore-sett').value = yesCount * 2;
+  calcCosto();
+  setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function calcCosto() {
+  const tecnici  = parseFloat(document.getElementById('n-tecnici').value) || 0;
+  const oreSett  = parseFloat(document.getElementById('ore-sett').value)  || 0;
+  const costoOra = parseFloat(document.getElementById('costo-ora').value) || 0;
+  const annuo = tecnici * oreSett * 46 * costoOra;
+  document.getElementById('costo-annuo').textContent = annuo > 0
+    ? '€ ' + annuo.toLocaleString('it-IT', {maximumFractionDigits:0}) : '€ —';
+}
+
+renderQuestions();
+</script>
+</body>
+</html>
